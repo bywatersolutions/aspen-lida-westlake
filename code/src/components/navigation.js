@@ -22,7 +22,7 @@ import { SelfRegistration } from '../screens/Auth/SelfRegistration';
 import { SplashScreen } from '../screens/Auth/Splash';
 import { getTermFromDictionary } from '../translations/TranslationService';
 import { GLOBALS } from '../util/globals';
-import { updateAspenLiDABuild } from '../util/greenhouse';
+//import { updateAspenLiDABuild } from '../util/greenhouse';
 import { LIBRARY } from '../util/loadLibrary';
 import { checkCachedUrl } from '../util/login';
 import { RemoveData } from '../util/logout';
@@ -154,13 +154,13 @@ export function App() {
 
      React.useEffect(() => {
           const bootstrapAsync = async () => {
-               console.log('Checking updates...');
-               if (Updates.manifest && Updates.channel !== 'development' && !__DEV__) {
-                    await updateAspenLiDABuild(Updates.updateId, Updates.channel, Updates.createdAt);
-                    console.log('Update information sent to Greenhouse.');
-               } else {
-                    console.log('No update to send to Greenhouse.');
-               }
+//               console.log('Checking updates...');
+//               if (Updates.manifest && Updates.channel !== 'development' && !__DEV__) {
+//                    await updateAspenLiDABuild(Updates.updateId, Updates.channel, Updates.createdAt);
+//                    console.log('Update information sent to Greenhouse.');
+//               } else {
+//                    console.log('No update to send to Greenhouse.');
+//               }
 
                console.log('Checking existing session...');
                let userToken;
