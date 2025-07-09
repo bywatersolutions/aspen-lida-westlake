@@ -36,6 +36,8 @@ import {refreshProfile, updateHoldPickupPreferences} from "../../../util/api/use
 import {PATRON} from "../../../util/loadPatron";
 import {SelectNewHoldSublocation} from "../../../components/Action/Holds/SelectNewHoldSublocation";
 
+import { logDebugMessage, logInfoMessage, logWarnMessage, logErrorMessage } from '../../../util/logging.js';
+
 export const Settings_PickupLocations = () => {
 	const [loading, setLoading] = React.useState(false);
 	const { library } = React.useContext(LibrarySystemContext);
@@ -128,7 +130,6 @@ export const Settings_PickupLocations = () => {
 					<FormControlLabelText color={textColor}>{getTermFromDictionary(language, 'preferred_pickup_branch')}</FormControlLabelText>
 				</FormControlLabel>
 				<Select
-					isReadOnly={Platform.OS === 'android'}
 					name="pickupLocations"
 					selectedValue={location}
 					minWidth="200"
@@ -173,7 +174,6 @@ export const Settings_PickupLocations = () => {
 						<FormControlLabelText color={textColor}>{getTermFromDictionary(language, 'alternate_pickup_location_1')}</FormControlLabelText>
 					</FormControlLabel>
 					<Select
-						isReadOnly={Platform.OS === 'android'}
 						name="pickupLocations1"
 						selectedValue={location1Id}
 						minWidth="200"
@@ -216,7 +216,6 @@ export const Settings_PickupLocations = () => {
 						<FormControlLabelText color={textColor}>{getTermFromDictionary(language, 'alternate_pickup_location_2')}</FormControlLabelText>
 					</FormControlLabel>
 					<Select
-						isReadOnly={Platform.OS === 'android'}
 						name="pickupLocation2"
 						selectedValue={location2Id}
 						minWidth="200"
