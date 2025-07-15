@@ -4,7 +4,7 @@ import { ListItem } from '@rneui/themed';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Image } from 'expo-image';
 import _ from 'lodash';
-import { Actionsheet, Alert, AlertDialog, Box, Button, Center, CheckIcon, FlatList, FormControl, HStack, Icon, Pressable, ScrollView, Select, Text, VStack } from 'native-base';
+import { Actionsheet, Alert, AlertDialog, Box, Button, Center, CheckIcon, FlatList, Input, FormControl, HStack, Icon, Pressable, ScrollView, Select, Text, VStack } from 'native-base';
 import React from 'react';
 import { Platform, SafeAreaView } from 'react-native';
 import { loadError } from '../../../components/loadError';
@@ -49,7 +49,7 @@ export const MyReadingHistory = () => {
           });
      }, [navigation]);
 
-     const { status, data, error, isFetching, isPreviousData } = useQuery(['reading_history', user.id, library.baseUrl, page, sort], () => fetchReadingHistory(page, pageSize, sort, library.baseUrl), {
+     const { status, data, error, isFetching, isPreviousData } = useQuery(['reading_history', user.id, library.baseUrl, page, sort, searchTerm], () => fetchReadingHistory(page, pageSize, sort, searchTerm, library.baseUrl), {
           initialData: readingHistory,
           keepPreviousData: true,
           staleTime: 1000,
@@ -165,10 +165,25 @@ export const MyReadingHistory = () => {
           console.log('updatePage: ' + value);
           setLoading(true);
           setPage(value);
-          await queryClient.invalidateQueries({ queryKey: ['reading_history', user.id, library.baseUrl, page, sort] });
-          await queryClient.refetchQueries({ queryKey: ['reading_history', user.id, library.baseUrl, value, sort] });
+          await queryClient.invalidateQueries({ queryKey: ['reading_history', user.id, library.baseUrl, page, sort, searchTerm] });
+          await queryClient.refetchQueries({ queryKey: ['reading_history', user.id, library.baseUrl, value, sort, searchTerm] });
           setLoading(false);
      };
+
+     const [searchTerm, setSearchTerm] = React.useState('');
+
+     const search = async () => {
+          console.log('updateSearchTerm: ' + searchTerm);
+          setLoading(true);
+          setSearchTerm(searchTerm);
+          await queryClient.invalidateQueries({ queryKey: ['reading_history', user.id, library.baseUrl, page, sort, searchTerm] });
+          await queryClient.refetchQueries({ queryKey: ['reading_history', user.id, library.baseUrl, page, sort, searchTerm] });
+          setLoading(false);
+     }
+
+     const clearSearch = () => {
+          setSearchTerm('');
+     }
 
      const [expanded, setExpanded] = React.useState(false);
      const getDisclaimer = () => {
@@ -239,35 +254,38 @@ export const MyReadingHistory = () => {
                     }}
                     borderColor="coolGray.200"
                     flexWrap="nowrap">
-                    <ScrollView horizontal>
-                         <HStack space={2}>
-                              <FormControl w={sortLength}>
-                                   <Select
-                                        _dark={{
-                                             borderWidth: '1',
-                                             borderColor: 'gray.400',
-                                        }}
-                                        isReadOnly={Platform.OS === 'android'}
-                                        name="sortBy"
-                                        selectedValue={sort}
-                                        accessibilityLabel={getTermFromDictionary(language, 'select_sort_method')}
-                                        _selectedItem={{
-                                             bg: 'tertiary.300',
-                                             endIcon: <CheckIcon size="5" />,
-                                        }}
-                                        onValueChange={(itemValue) => updateSort(itemValue)}>
-                                        <Select.Item label={sortBy.title} value="title" key={0} />
-                                        <Select.Item label={sortBy.author} value="author" key={1} />
-                                        <Select.Item label={sortBy.last_used} value="checkedOut" key={2} />
-                                        <Select.Item label={sortBy.format} value="format" key={3} />
-                                   </Select>
-                              </FormControl>
-                              <Button.Group size="sm" variant="solid" colorScheme="danger">
-                                   <Button onPress={() => setDeleteAllIsOpen(true)}>{getTermFromDictionary(language, 'reading_history_delete_all')}</Button>
-                                   <Button onPress={() => setIsOpen(true)}>{getTermFromDictionary(language, 'reading_history_opt_out')}</Button>
-                              </Button.Group>
-                         </HStack>
-                    </ScrollView>
+                    <VStack space={2}>
+                         <Input returnKeyType="search" variant="outline" autoCapitalize="none" onChangeText={(term) => setSearchTerm(term)} status="info" placeholder={getTermFromDictionary(language, 'search')} onSubmitEditing={search} value={searchTerm} size="lg" sx={{ color: textColor, borderColor: textColor, ':focus': { borderColor: textColor } }}/>
+                         <ScrollView horizontal>
+                              <HStack space={2}>
+                                   <FormControl w={sortLength}>
+                                        <Select
+                                            _dark={{
+                                                 borderWidth: '1',
+                                                 borderColor: 'gray.400',
+                                            }}
+                                            isReadOnly={Platform.OS === 'android'}
+                                            name="sortBy"
+                                            selectedValue={sort}
+                                            accessibilityLabel={getTermFromDictionary(language, 'select_sort_method')}
+                                            _selectedItem={{
+                                                 bg: 'tertiary.300',
+                                                 endIcon: <CheckIcon size="5" />,
+                                            }}
+                                            onValueChange={(itemValue) => updateSort(itemValue)}>
+                                             <Select.Item label={sortBy.title} value="title" key={0} />
+                                             <Select.Item label={sortBy.author} value="author" key={1} />
+                                             <Select.Item label={sortBy.last_used} value="checkedOut" key={2} />
+                                             <Select.Item label={sortBy.format} value="format" key={3} />
+                                        </Select>
+                                   </FormControl>
+                                   <Button.Group size="sm" variant="solid" colorScheme="danger">
+                                        <Button onPress={() => setDeleteAllIsOpen(true)}>{getTermFromDictionary(language, 'reading_history_delete_all')}</Button>
+                                        <Button onPress={() => setIsOpen(true)}>{getTermFromDictionary(language, 'reading_history_opt_out')}</Button>
+                                   </Button.Group>
+                              </HStack>
+                         </ScrollView>
+                    </VStack>
 
                     <Center>
                          <AlertDialog leastDestructiveRef={cancelRef} isOpen={isOpen} onClose={onClose}>
@@ -346,7 +364,7 @@ export const MyReadingHistory = () => {
                                                   let newPage = page + 1;
                                                   updatePage(newPage);
                                                   setLoading(true);
-                                                  await fetchReadingHistory(newPage, pageSize, sort, library.baseUrl).then((result) => {
+                                                  await fetchReadingHistory(newPage, pageSize, sort, searchTerm, library.baseUrl).then((result) => {
                                                        updateReadingHistory(data);
                                                        if (data.totalPages) {
                                                             let tmp = getTermFromDictionary(language, 'page_of_page');
