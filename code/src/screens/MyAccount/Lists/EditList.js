@@ -184,13 +184,13 @@ const DeleteList = (props) => {
                     <AlertDialogBackdrop />
                     <AlertDialogContent bgColor={colorMode === 'light' ? theme['colors']['warmGray']['50'] : theme['colors']['coolGray']['700']}>
                          <AlertDialogHeader>
-                              <Heading size="md" color={textColor}>Delete List</Heading>
+                              <Heading size="md" color={textColor}>{getTermFromDictionary(language, 'delete_list')}</Heading>
                               <AlertDialogCloseButton>
                                    <Icon as={CloseIcon} color={textColor} />
                               </AlertDialogCloseButton>
                          </AlertDialogHeader>
                          <AlertDialogBody>
-                              <Text color={textColor}>Are you sure you want to delete this list? The list will be soft-deleted and can be restored within 30 days.</Text>
+                              <Text color={textColor}>{getTermFromDictionary(language, 'delete_list_confirmation')}</Text>
                               <FormControl pt="$3">
                                    <Checkbox
                                         value="optOut"
@@ -201,19 +201,19 @@ const DeleteList = (props) => {
                                         <CheckboxIndicator mr="$2" borderColor={colorMode === 'light' ? theme['colors']['coolGray']['500'] : theme['colors']['gray']['300']}>
                                              <CheckboxIcon as={CheckIcon} color={colorMode === 'light' ? theme['colors']['coolGray']['500'] : theme['colors']['gray']['300']} />
                                         </CheckboxIndicator>
-                                        <CheckboxLabel color={textColor}>Opt Out of Soft Deletion</CheckboxLabel>
+                                        <CheckboxLabel color={textColor}>{getTermFromDictionary(language, 'opt_out_soft_deletion')}</CheckboxLabel>
                                    </Checkbox>
                               </FormControl>
                          </AlertDialogBody>
                          <AlertDialogFooter>
                               <ButtonGroup space="sm">
                                    <Button variant="link" onPress={onClose} ref={cancelRef}>
-                                        <ButtonText color={textColor}>Cancel</ButtonText>
+                                        <ButtonText color={textColor}>{getTermFromDictionary(language, 'cancel')}</ButtonText>
                                    </Button>
                                    <Button
                                         bgColor={theme['colors']['danger']['500']}
                                         isLoading={loading}
-                                        isLoadingText="Deleting..."
+                                        isLoadingText={getTermFromDictionary(language, 'deleting', true)}
                                         onPress={() => {
                                              setLoading(true);
                                              deleteList(listId, library.baseUrl, optOutOfSoftDeletion).then(async (res) => {
@@ -234,7 +234,7 @@ const DeleteList = (props) => {
                                                   }
                                              });
                                         }}>
-                                        <ButtonText color={theme['colors']['white']}>Delete</ButtonText>
+                                        <ButtonText color={theme['colors']['white']}>{getTermFromDictionary(language, 'delete')}</ButtonText>
                                    </Button>
                               </ButtonGroup>
                          </AlertDialogFooter>
