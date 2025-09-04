@@ -24,7 +24,7 @@ export default function TabNavigator() {
 
      const activeIcon = colorMode === 'light' ? theme['colors']['coolGray']['700'] : theme['colors']['coolGray']['300'];
      const inactiveIcon = colorMode === 'light' ? theme['colors']['coolGray']['500'] : theme['colors']['coolGray']['400'];
-     const tabBarBackgroundColor = colorMode;
+     const tabBarBackgroundColor = colorMode === 'light' ? theme['colors']['coolGray']['100'] : theme['colors']['coolGray']['900'];
 
      return (
           <Tab.Navigator
@@ -118,7 +118,8 @@ export const TabItem = ({ state, descriptors, navigation }) => {
 
      const activeIcon = colorMode === 'light' ? theme['colors']['coolGray']['700'] : theme['colors']['coolGray']['300'];
      const inactiveIcon = colorMode === 'light' ? theme['colors']['coolGray']['500'] : theme['colors']['coolGray']['400'];
-     const tabBarBackgroundColor = colorMode;
+     const tabBarBackgroundColor = colorMode === 'light' ? theme['colors']['coolGray']['100'] : theme['colors']['coolGray']['900'];
+     const tabBarBorderColor = colorMode === 'light' ? theme['colors']['coolGray']['200'] : theme['colors']['coolGray']['300'];
 
      const [browseTabLabel, setBrowseTabLabel] = React.useState(getTermFromDictionary(language, 'nav_discover'));
      const [cardTabLabel, setCardTabLabel] = React.useState(getTermFromDictionary(language, 'nav_card'));
@@ -141,7 +142,7 @@ export const TabItem = ({ state, descriptors, navigation }) => {
      const bottomPaddingToken = Platform.OS === 'android' ? "$3" : "$8";
 
      return (
-          <HStack px="$7" pt="$2" pb={insets.bottom} gap="$4" alignItems="center" justifyContent="space-between" backgroundColor={colorMode === 'light' ? '$white' : '$black'} borderTopWidth={1} borderColor={colorMode === 'light' ? '$coolGray200' : '$coolGray300'}>
+          <HStack px="$7" pt="$2" pb={insets.bottom} gap="$4" alignItems="center" justifyContent="space-between" backgroundColor={tabBarBackgroundColor} borderTopWidth={1} borderColor={tabBarBorderColor}>
                {state.routes.map((route, index) => {
                     const { options } = descriptors[route.key];
                     //let label = options.tabBarLabel !== undefined ? options.tabBarLabel : options.title !== undefined ? options.title : route.name;
