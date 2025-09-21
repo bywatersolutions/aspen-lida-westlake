@@ -202,25 +202,54 @@ export const MyLibraryCard = () => {
 	 }*/
 
      //MaterialCommunityIcons = phone-rotate-landscape
+     if (isLandscape && cards.length > 1) {
+          return (
+               <VStack flex={1} p="$3">
+                    <Box flex={2}>
+                         <CardCarousel cards={cards} orientation={isLandscape} />
+                    </Box>
+                    {shouldShowAlternateLibraryCard && (
+                         <Box flex={1} justifyContent="flex-end" alignItems="center" pb="$3">
+                              <Button
+                                   size="md"
+                                   bgColor={theme['colors']['secondary']['500']}
+                                   onPress={() => {
+                                        navigateStack('LibraryCardTab', 'MyAlternateLibraryCard', {
+                                             prevRoute: 'MyLibraryCard',
+                                             hasPendingChanges: false,
+                                        });
+                                   }}>
+                                   <ButtonText color={theme['colors']['secondary']['500-text']}>{getTermFromDictionary(language, 'manage_alternate_library_card')}</ButtonText>
+                              </Button>
+                         </Box>
+                    )}
+               </VStack>
+          );
+     }
+
      return (
-          <>
-               <CardCarousel cards={cards} orientation={isLandscape} />
-               {shouldShowAlternateLibraryCard ? (
-                    <Center mb="$3">
-                         <Button
-                              size="md"
-                              bgColor={theme['colors']['secondary']['500']}
-                              onPress={() => {
-                                   navigateStack('LibraryCardTab', 'MyAlternateLibraryCard', {
-                                        prevRoute: 'MyLibraryCard',
-                                        hasPendingChanges: false,
-                                   });
-                              }}>
-                              <ButtonText color={theme['colors']['secondary']['500-text']}>{getTermFromDictionary(language, 'manage_alternate_library_card')}</ButtonText>
-                         </Button>
-                    </Center>
-               ) : null}
-          </>
+          <VStack flex={1} justifyContent="space-between">
+               <Box flex={1} justifyContent="center">
+                    <CardCarousel cards={cards} orientation={isLandscape} />
+               </Box>
+               {shouldShowAlternateLibraryCard && (
+                    <Box pb="$5">
+                         <Center>
+                              <Button
+                                   size="md"
+                                   bgColor={theme['colors']['secondary']['500']}
+                                   onPress={() => {
+                                        navigateStack('LibraryCardTab', 'MyAlternateLibraryCard', {
+                                             prevRoute: 'MyLibraryCard',
+                                             hasPendingChanges: false,
+                                        });
+                                   }}>
+                                   <ButtonText color={theme['colors']['secondary']['500-text']}>{getTermFromDictionary(language, 'manage_alternate_library_card')}</ButtonText>
+                              </Button>
+                         </Center>
+                    </Box>
+               )}
+          </VStack>
      );
 };
 
@@ -346,7 +375,21 @@ const CreateLibraryCard = (data) => {
                ) : null}
                <Center>
                     {showExpirationDate && expirationDate && !neverExpires && numCards > 1 ? <Text color={textColor}>{expirationText}</Text> : null}
-                    {numCards > 1 ? <OpenBarcode barcodeValue={barcodeValue} barcodeFormat={barcodeStyle} handleBarcodeError={handleBarcodeError} language={language} /> : <><Barcode value={barcodeValue} format={barcodeStyle} background={theme['colors']['warmGray']['200']} onError={handleBarcodeError} /><Text color={textColor} fontSize="$xl" textAlign="center">{barcodeValue}</Text></>}
+                    {numCards > 1 ? (
+                         <OpenBarcode barcodeValue={barcodeValue} barcodeFormat={barcodeStyle} handleBarcodeError={handleBarcodeError} language={language} />
+                    ) : (
+                         <VStack alignItems="center" space="sm">
+                              <Box bg={theme['colors']['warmGray']['200']} p="$3" borderRadius="$sm">
+                                   <Barcode
+                                        value={barcodeValue}
+                                        format={barcodeStyle}
+                                        background={theme['colors']['warmGray']['200']}
+                                        onError={handleBarcodeError}
+                                   />
+                              </Box>
+                              <Text color={textColor} fontSize="$xl" textAlign="center">{barcodeValue}</Text>
+                         </VStack>
+                    )}
                     {showExpirationDate && expirationDate && !neverExpires && numCards === 1 ? (
                          <Text color={textColor} fontSize="$sm" pt="$2">
                               {expirationText}
@@ -447,7 +490,15 @@ const CardCarousel = (data) => {
                     snapEnabled={true}
                     autoPlay={false}
                     mode="parallax"
-                    onProgressChange={(_, absoluteProgress) => (progressValue.value = absoluteProgress)}
+                    onProgressChange={(_, absoluteProgress) => {
+                         progressValue.value = absoluteProgress;
+                         const totalCards = cards.length;
+                         let newIndex = Math.round(absoluteProgress) % totalCards;
+                         if (newIndex < 0) newIndex = totalCards + newIndex;
+                         if (newIndex !== currentIndex && newIndex >= 0 && newIndex < totalCards) {
+                              setCurrentIndex(newIndex);
+                         }
+                    }}
                     onSnapToItem={(index) => setCurrentIndex(index)}
                     modeConfig={{
                          parallaxScrollingScale: 0.9,
@@ -471,9 +522,58 @@ const OpenBarcode = (data) => {
      const { theme } = React.useContext(ThemeContext);
      const { barcodeValue, barcodeFormat, handleBarcodeError, language } = data;
      const [showModal, setShowModal] = React.useState(false);
+     const [orientation, setOrientation] = React.useState('portrait');
+     const [screenDimensions, setScreenDimensions] = React.useState(Dimensions.get('window'));
+
+     React.useEffect(() => {
+          const subscription = Dimensions.addEventListener('change', ({ window }) => {
+               setScreenDimensions(window);
+               const newOrientation = window.width > window.height ? 'landscape' : 'portrait';
+               setOrientation(newOrientation);
+
+               if (barcodeWidthRef.current) {
+                    const shouldShowWarning = evaluateBarcode(barcodeWidthRef.current, newOrientation, window);
+                    setShowRotateWarning(shouldShowWarning);
+               }
+          });
+
+          return () => subscription?.remove();
+     }, []);
 
      const toggleModal = () => {
-          setShowModal(!showModal);
+          const newShowModal = !showModal;
+          setShowModal(newShowModal);
+          if (newShowModal) {
+               setShowRotateWarning(false);
+               barcodeWidthRef.current = null;
+          }
+     };
+
+     const isPortrait = orientation === 'portrait';
+     const [showRotateWarning, setShowRotateWarning] = React.useState(false);
+     const barcodeWidthRef = React.useRef(null);
+
+     const evaluateBarcode = (width, currentOrientation, dimensions) => {
+          const modalPadding = 32; // ModalBody p="$4" (16px * 2 sides)
+          const centerPadding = 16; // Center p="$2" (8px * 2 sides)
+          const modalMargins = 32; // Modal itself has margins from screen edges
+          const edgeBuffer = 16; // Small buffer from modal content edges
+
+          const availableWidth = dimensions.width - modalPadding - centerPadding - modalMargins - edgeBuffer;
+          const isTooWide = width > availableWidth;
+          const shouldShowWarning = isTooWide && currentOrientation === 'portrait';
+
+          return shouldShowWarning;
+     };
+
+     const onBarcodeLayout = (event) => {
+          const { width } = event.nativeEvent.layout;
+          barcodeWidthRef.current = width;
+          // Only evaluate if this is the initial measurement; let orientation handler deal with changes.
+          if (!showRotateWarning || orientation === 'portrait') {
+               const shouldShowWarning = evaluateBarcode(width, orientation, screenDimensions);
+               setShowRotateWarning(shouldShowWarning);
+          }
      };
 
      return (
@@ -485,9 +585,32 @@ const OpenBarcode = (data) => {
                <Modal isOpen={showModal} onClose={() => toggleModal()} size="xl">
                     <ModalBackdrop sx={{ opacity: 0.85 }} />
                     <ModalContent bgColor="white">
-                         <ModalBody bgColor="white">
-							  <Barcode value={barcodeValue} format={barcodeFormat} onError={handleBarcodeError} />
-                              <Center><Text fontSize="$xl" color="black">{barcodeValue}</Text></Center>
+                         <ModalBody bgColor="white" p="$4">
+                              {/* Always render barcode to measure it, but hide if showing warning. */}
+                              <Box style={{ opacity: showRotateWarning ? 0 : 1, position: showRotateWarning ? 'absolute' : 'relative' }}>
+                                   <Center p="$2">
+                                        <Box onLayout={onBarcodeLayout}>
+                                             <Barcode
+                                                  value={barcodeValue}
+                                                  format={barcodeFormat}
+                                                  onError={handleBarcodeError}
+                                             />
+                                        </Box>
+                                   </Center>
+                              </Box>
+
+                              {showRotateWarning && (
+                                   <VStack space="md" alignItems="center" p="$4">
+                                        <Icon as={MaterialCommunityIcons} name="phone-rotate-landscape" size="xl" color="$amber600" />
+                                        <Text fontSize="$lg" textAlign="center" color="black">
+                                             {getTermFromDictionary(language, 'rotate_device_for_barcode')}
+                                        </Text>
+                                   </VStack>
+                              )}
+
+                              <Center mt="$2">
+                                   <Text fontSize="$xl" color="black">{barcodeValue}</Text>
+                              </Center>
                          </ModalBody>
                     </ModalContent>
                </Modal>
