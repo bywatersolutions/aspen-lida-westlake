@@ -88,7 +88,7 @@ const CreateList = (props) => {
           setGroupName('');
           setNewGroupName('');
           setNestedGroup('');
-          setExistingGroupId(user.lastListGroupAdded ? user.lastListGroupAdded : listGroups.groups[0].id);
+          setExistingGroupId(user.lastListGroupAdded ? user.lastListGroupAdded : (listGroups?.groups[0] ? listGroups.groups[0].id : 0));
      };
 
      return (
