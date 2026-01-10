@@ -275,7 +275,7 @@ export const MyLists = () => {
                          <ScrollView horizontal>
                               <ButtonGroup space="sm">
                                    <CreateList setLoading={setLoading} />
-                                   <CreateListGroup setLoading={setLoading} />
+                                   <CreateListGroup setLoading={setLoading} updateSelectedListGroup={updateSelectedListGroup} />
                               </ButtonGroup>
                          </ScrollView>
                     </Box>

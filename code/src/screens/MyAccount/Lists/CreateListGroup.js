@@ -11,7 +11,7 @@ import { Platform } from 'react-native';
 import _ from 'lodash';
 
 const CreateListGroup = (props) => {
-     const { setLoading } = props;
+     const { setLoading, updateSelectedListGroup } = props;
      const queryClient = useQueryClient();
      const { user, listGroups } = React.useContext(UserContext);
      const { library } = React.useContext(LibrarySystemContext);
@@ -117,6 +117,9 @@ const CreateListGroup = (props) => {
                                                   toggle();
                                                   setLoading(true);
                                                   popAlert(getTermFromDictionary(language, 'list_created'), res.data.result.message, status);
+                                                  if(res.data.result.groupId) {
+                                                       updateSelectedListGroup(res.data.result.groupId);
+                                                  }
                                              });
                                         }}>
                                         <ButtonText color={theme['colors']['primary']['500-text']}>{getTermFromDictionary(language, 'create_list_group')}</ButtonText>
