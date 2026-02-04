@@ -236,7 +236,7 @@ export const DrawerContent = () => {
           }
      });
 
-     useQuery(['lists', user.id, library.baseUrl, language], () => getLists(library.baseUrl), {
+     useQuery(['lists', user.id, library.baseUrl, language], () => getLists(library.baseUrl, 1, 20, 1), {
           refetchInterval: 60 * 1000 * 15,
           refetchIntervalInBackground: true,
           notifyOnChangeProps: ['data'],
@@ -244,10 +244,10 @@ export const DrawerContent = () => {
           placeholderData: [],
           onSuccess: (data) => {
                if(data.ok) {
-                    const lists = formatLists(data.data.result);
-                    updateLists(lists)
+                    const results = data.data.result;
+                    updateLists(results)
                } else {
-                    logDebugMessage("Error fetching user linked accounts");
+                    logDebugMessage("Error fetching user lists");
                     logDebugMessage(data);
                     getErrorMessage(data.code ?? 0, data.problem);
                }
@@ -256,6 +256,27 @@ export const DrawerContent = () => {
                logDebugMessage("Error fetching user lists");
                logErrorMessage(error);
           }
+     });
+
+     useQuery(['all_lists', user.id, library.baseUrl, language], () => getLists(library.baseUrl, 1, 20, 0), {
+          refetchInterval: 60 * 1000 * 60,
+          refetchIntervalInBackground: true,
+          notifyOnChangeProps: ['data'],
+          refetchOnWindowFocus: 'always',
+          placeholderData: [],
+          onSuccess: (data) => {
+               if (data.ok) {
+                    formatLists(data.data.result); // this is just for PATRON.lists which is used for populating Selects of user lists (Adding to List)
+               } else {
+                    logDebugMessage('Error fetching all user lists');
+                    logDebugMessage(data);
+                    getErrorMessage(data.code ?? 0, data.problem);
+               }
+          },
+          onError: (error) => {
+               logDebugMessage('Error fetching all user lists');
+               logErrorMessage(error);
+          },
      });
 
      useQuery(['list_groups', user.id, library.baseUrl, language], () => getListGroups(library.baseUrl), {
@@ -268,7 +289,7 @@ export const DrawerContent = () => {
                if(data.ok) {
                     const groups = {
                          groups: data.data?.result?.groups ?? [],
-                         unassigned: data.data?.result?.unassigned ?? []
+                         unassigned: data.data?.result?.unassigned ?? 0
                     };
                     updateListGroups(groups);
                } else {

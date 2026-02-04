@@ -37,22 +37,34 @@ export async function getListDetails(id, url) {
 /**
  * Returns all lists for a given user
  * @param {string} url
+ * @param {int} page
+ * @param {int} limit
+ * @param {int} includePagination
  **/
-export async function getLists(url) {
+export async function getLists(url, page= 1, limit = 20, includePagination = 1) {
      const postBody = await postData();
      const api = create({
           baseURL: url + '/API',
           timeout: GLOBALS.timeoutAverage,
           headers: getHeaders(true),
           auth: createAuthTokens(),
+          params: {
+               page,
+               limit,
+               includePagination
+          }
      });
      return await api.post('/ListAPI?method=getUserLists&checkIfValid=false', postBody);
 }
 
 export function formatLists(data) {
      let lists = [];
-     if (!_.isUndefined(data.lists)) {
-          lists = _.sortBy(data.lists, ['title']);
+     if (!_.isUndefined(data)) {
+          if(data.lists) {
+               lists = _.sortBy(data.lists, ['title']);
+          } else {
+               lists = _.sortBy(data, ['title']);
+          }
      }
      PATRON.lists = lists;
      return lists;
@@ -317,8 +329,11 @@ export async function getListGroups(url) {
  * Returns details about a given list group
  * @param {int} listGroupId
  * @param {string} url
+ * @param {int} page
+ * @param {int} limit
+ * @param {int} includePagination
  **/
-export async function getListGroupDetails(listGroupId, url) {
+export async function getListGroupDetails(listGroupId, url, page = 1, limit = 20, includePagination = 1) {
      const postBody = await postData();
      const api = create({
           baseURL: url + '/API',
@@ -326,7 +341,10 @@ export async function getListGroupDetails(listGroupId, url) {
           headers: getHeaders(true),
           auth: createAuthTokens(),
           params: {
-               groupId: listGroupId
+               groupId: listGroupId,
+               page,
+               limit,
+               includePagination
           },
      });
      return await api.post('/ListAPI?method=getListGroupDetails', postBody);
