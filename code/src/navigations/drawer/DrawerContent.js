@@ -31,7 +31,7 @@ import { getLocations } from '../../util/api/location';
 import { fetchNotificationHistory, fetchSavedSearches, getLinkedAccounts, getPatronCheckedOutItems, sortCheckouts, getPatronHolds, sortHolds, getViewerAccounts, refreshProfile, reloadProfile, revalidateUser, validateSession, formatNotificationHistory, formatLinkedAccounts, formatHolds } from '../../util/api/user';
 import { getErrorMessage, passUserToDiscovery, stripHTML } from '../../util/apiAuth';
 import { GLOBALS } from '../../util/globals';
-import { formatDiscoveryVersion, formatPickupLocations, getPickupLocations, reloadBrowseCategories } from '../../util/loadLibrary';
+import { formatDiscoveryVersion, formatPickupLocations, getHomeScreenFeed, getPickupLocations } from '../../util/loadLibrary';
 import { getBrowseCategoryListForUser, getILSMessages, PATRON } from '../../util/loadPatron';
 
 import { logDebugMessage, logInfoMessage, logWarnMessage, logErrorMessage } from '../../util/logging.js';
@@ -66,7 +66,7 @@ export const DrawerContent = () => {
      const queryClient = useQueryClient();
      const insets = useSafeAreaInsets();
      const { user, accounts, viewers, cards, lists, updateUser, updateLanguage, updatePickupLocations, updateLinkedAccounts, updatePreferredPickupLocationIsValid, updatePreferredPickupLocationWarning, updateLists, updateSavedEvents, updateLibraryCards, updateLinkedViewerAccounts, updateReadingHistory, notificationSettings, expoToken, updateNotificationOnboard, notificationOnboard, notificationHistory, updateNotificationHistory, userHoldPendingSortMethod, userHoldReadySortMethod, userCheckoutSortMethod, updateListGroups } = React.useContext(UserContext);
-     const { library, catalogStatus, updateCatalogStatus } = React.useContext(LibrarySystemContext);
+     const { library, catalogStatus, updateCatalogStatus, updateHomeScreenLinks } = React.useContext(LibrarySystemContext);
      const [notifications, setNotifications] = React.useState([]);
      const [messages, setILSMessages] = React.useState([]);
      const { category, list, maxNum, updateBrowseCategories, updateBrowseCategoryList, updateMaxCategories } = React.useContext(BrowseCategoryContext);
@@ -172,16 +172,17 @@ export const DrawerContent = () => {
           }
      });
 
-     useQuery(['browse_categories', library.baseUrl, language, maxNum], () => reloadBrowseCategories(maxNum, library.baseUrl), {
+     useQuery(['browse_categories', library.baseUrl, language, maxNum], () => getHomeScreenFeed(maxNum, library.baseUrl), {
           refetchInterval: 60 * 1000 * 15,
           refetchIntervalInBackground: true,
           initialData: category,
           onSuccess: (data) => {
                if(data.ok) {
-                    const categories = data.data.result;
-                    updateBrowseCategories(categories);
+                    const result = data.data.result;
+                    updateBrowseCategories(result.browseCategories);
+                    updateHomeScreenLinks(result.homeScreenLinks);
                } else {
-                    logDebugMessage("Error fetching browse categories");
+                    logDebugMessage("Error fetching browse categories and home screen links");
                     logDebugMessage(data);
                     getErrorMessage(data.code ?? 0, data.problem);
                }
