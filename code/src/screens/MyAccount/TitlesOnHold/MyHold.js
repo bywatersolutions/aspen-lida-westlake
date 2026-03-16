@@ -152,11 +152,13 @@ export const MyHold = (props) => {
                               <Center>
                                    <Checkbox value={method + '|' + hold.recordId + '|' + hold.cancelId + '|' + hold.source + '|' + hold.userId} my="$3" size="md" accessibilityLabel="Check item">
                                         <CheckboxIndicator
-                                             _checked={{
-                                                  color: theme['colors']['primary']['500'],
-                                                  borderColor: theme['colors']['primary']['500'],
+                                             sx={{
+                                                  ':checked': {
+                                                       borderColor: theme['colors']['primary']['500'],
+                                                       backgroundColor: theme['colors']['primary']['500'],
+                                                  },
                                              }}>
-                                             <CheckboxIcon as={CheckIcon}  sx={{ color: theme['colors']['primary']['500-text'] }}/>
+                                             <CheckboxIcon as={CheckIcon} color={theme['colors']['primary']['500-text']} />
                                         </CheckboxIndicator>
                                    </Checkbox>
                               </Center>
