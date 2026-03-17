@@ -1,0 +1,15 @@
+{
+  "name": "Westlake Porter Public Library",
+  "slug": "westlake",
+  "easId": "74e32722-9fa7-49ef-8e3a-442ef253de98",
+  "reverseDns": "org.aspendiscovery.westlake",
+  "discoveryUrl": "https://search.westlakelibrary.org/",
+  "greenhouseUrl": "https://search.westlakelibrary.org/",
+  "libraryId": "2",
+  "themeId": "1",
+  "background": "#FFFFFF",
+  "sentryProject": "aspen-lida-westlake",
+  "sentryDsn": "https://07f77152a0b72a8b60a7aab2a7cee15f@o994439.ingest.us.sentry.io/4507346085412865",
+  "ascAppId": "6503456653",
+  "logLevel": "0"
+}
