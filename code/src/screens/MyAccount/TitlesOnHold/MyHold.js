@@ -152,11 +152,13 @@ export const MyHold = (props) => {
                               <Center>
                                    <Checkbox value={method + '|' + hold.recordId + '|' + hold.cancelId + '|' + hold.source + '|' + hold.userId} my="$3" size="md" accessibilityLabel="Check item">
                                         <CheckboxIndicator
-                                             _checked={{
-                                                  color: theme['colors']['primary']['500'],
-                                                  borderColor: theme['colors']['primary']['500'],
+                                             sx={{
+                                                  ':checked': {
+                                                       borderColor: theme['colors']['primary']['500'],
+                                                       backgroundColor: theme['colors']['primary']['500'],
+                                                  },
                                              }}>
-                                             <CheckboxIcon as={CheckIcon}  sx={{ color: theme['colors']['primary']['500-text'] }}/>
+                                             <CheckboxIcon as={CheckIcon} color={theme['colors']['primary']['500-text']} />
                                         </CheckboxIndicator>
                                    </Checkbox>
                               </Center>
@@ -314,7 +316,7 @@ export const MyHold = (props) => {
                     );
                } else {
                     if (library.showDateWhenSuspending) {
-                         return <SelectThawDate isOpen={showActionsheet} label={null} freezeLabel={freezeHoldLabel} freezingLabel={freezingHoldLabel} language={language} libraryContext={library} holdsContext={updateHolds} onClose={handleClose} freezeId={hold.cancelId} recordId={record} source={hold.source} libraryUrl={library.baseUrl} userId={hold.userId} resetGroup={resetGroup} textColor={textColor} colorMode={colorMode} />;
+                         return <SelectThawDate isOpen={showActionsheet} label={null} freezeLabel={freezeHoldLabel} freezingLabel={freezingHoldLabel} language={language} libraryContext={library} holdsContext={updateHolds} onClose={handleClose} freezeId={hold.cancelId} recordId={record} source={hold.source} libraryUrl={library.baseUrl} userId={hold.userId} resetGroup={resetGroup} textColor={textColor} colorMode={colorMode} theme={theme}/>;
                     }else{
                          return (
                               <ActionsheetItem
@@ -515,7 +517,7 @@ export const ManageSelectedHolds = (props) => {
      const freezeActionItem = () => {
           if (numToFreeze > 0) {
                if (library.showDateWhenSuspending) {
-                    return <SelectThawDate isOpen={showActionsheet} label={numToFreezeLabel} freezeLabel={freezeHoldLabel} freezingLabel={freezingHoldLabel} language={language} holdsContext={updateHolds} libraryContext={library} resetGroup={resetGroup} onClose={handleClose} count={numToFreeze} numSelected={numSelected} data={titlesToFreeze} colorMode={colorMode} textColor={textColor} />;
+                    return <SelectThawDate isOpen={showActionsheet} label={numToFreezeLabel} freezeLabel={freezeHoldLabel} freezingLabel={freezingHoldLabel} language={language} holdsContext={updateHolds} libraryContext={library} resetGroup={resetGroup} onClose={handleClose} count={numToFreeze} numSelected={numSelected} data={titlesToFreeze} colorMode={colorMode} textColor={textColor} theme={theme}/>;
                }else{
                     return (
                          <ActionsheetItem
@@ -523,7 +525,7 @@ export const ManageSelectedHolds = (props) => {
                               isLoadingText={getTermFromDictionary(language, 'freezing_hold', true)}
                               onPress={() => {
                                    startFreezing(true);
-                                   freezeHolds(titlesToFreeze, library.baseUrl, allowIndefinite = library.reactivateDateNotRequired ?? false).then((r) => {
+                                   freezeHolds(titlesToFreeze, library.baseUrl, null,'en', library.reactivateDateNotRequired ?? false).then((r) => {
                                         resetGroup();
                                         handleClose();
                                         startFreezing(false);
@@ -635,7 +637,7 @@ export const ManageAllHolds = (props) => {
      const freezeAllActionItem = () => {
           if (numToFreeze > 0) {
                if (library.showDateWhenSuspending) {
-                    return <SelectThawDate label={numToFreezeLabel} freezeLabel={freezeHoldLabel} freezingLabel={freezingHoldLabel} language={language} holdsContext={updateHolds} libraryContext={library} resetGroup={resetGroup} onClose={handleClose} count={numToFreeze} numSelected={numToManage} data={titlesToFreeze} textColor={textColor} colorMode={colorMode} />;
+                    return <SelectThawDate label={numToFreezeLabel} freezeLabel={freezeHoldLabel} freezingLabel={freezingHoldLabel} language={language} holdsContext={updateHolds} libraryContext={library} resetGroup={resetGroup} onClose={handleClose} count={numToFreeze} numSelected={numToManage} data={titlesToFreeze} textColor={textColor} colorMode={colorMode} theme={theme}/>;
                }else{
                     return (
                          <ActionsheetItem
@@ -643,7 +645,7 @@ export const ManageAllHolds = (props) => {
                               isLoadingText={getTermFromDictionary(language, 'freezing_hold', true)}
                               onPress={() => {
                                    startFreezing(true);
-                                   freezeHolds(titlesToFreeze, library.baseUrl, allowIndefinite = library.reactivateDateNotRequired ?? false).then((r) => {
+                                   freezeHolds(titlesToFreeze, library.baseUrl, null,'en', library.reactivateDateNotRequired ?? false).then((r) => {
                                         resetGroup();
                                         onClose(onClose);
                                         startFreezing(false);
