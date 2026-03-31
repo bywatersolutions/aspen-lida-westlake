@@ -2,7 +2,7 @@ name: Upstream Sync
 
 on:
   schedule:
-    - cron: "0 0 1 2 *"   # Midnight UTC on Feb 1
+    - cron: "0 1 * * *"
   workflow_dispatch:
 
 jobs:
@@ -29,12 +29,35 @@ jobs:
             echo "exists=false" >> $GITHUB_OUTPUT
           fi
 
-      - name: 🔄 Fast-forward merge upstream/main
+      - name: 🔄 Rebase on upstream/main
         if: steps.check_branch.outputs.exists == 'true'
         run: |
-          git checkout main
-          git merge --ff-only upstream/main
-          git push origin main
+          git config --global user.email "dev@bywatersolutions.com"
+          git config --global user.name "ByWater Dev Team"
+
+          # Ensure we have everything
+          git fetch origin
+          git fetch upstream
+
+          # Checkout main explicitly from origin
+          git checkout -B main origin/main
+
+          # Rebase local commits onto upstream
+          git rebase upstream/main || {
+            echo "Rebase conflict detected. Aborting."
+            git rebase --abort
+            exit 1
+          }
+
+          # Show what changed (debug visibility)
+          echo "==== Git log after rebase ===="
+          git --no-pager log --oneline -n 10
+
+          echo "==== Diff vs origin/main ===="
+          git --no-pager diff origin/main || true
+
+          # Force push because rebase rewrites history
+          git push --force-with-lease origin main
 
       - name: ⚠️ Upstream main missing
         if: steps.check_branch.outputs.exists == 'false'
