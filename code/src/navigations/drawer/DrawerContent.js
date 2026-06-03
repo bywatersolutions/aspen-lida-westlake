@@ -26,7 +26,7 @@ import { getTermFromDictionary, getTranslationsWithValues, LanguageSwitcher } fr
 import { fetchSavedSearches, getListGroups, getLists } from '../../util/api/list';
 import { formatLists } from '../../util/api/listHelper';
 import { getLocations, getCatalogStatus } from '../../util/api/system';
-import { getILSMessages, getPickupLocations, fetchNotificationHistory, getLinkedAccounts, getPatronCheckedOutItems, getPatronHolds, getViewerAccounts, refreshProfile, reloadProfile, validateSession, passUserToDiscovery } from '../../util/api/user';
+import { getILSMessages, getPickupLocations, fetchNotificationHistory, getLinkedAccounts, getPatronCheckedOutItems, getPatronHolds, getViewerAccounts, refreshProfile, reloadProfile, validateSession, passUserToDiscovery, getPickupSublocations } from '../../util/api/user';
 import { sortCheckouts, sortHolds, formatNotificationHistory, formatLinkedAccounts, formatHolds, formatPickupLocations } from '../../util/api/userHelper';
 
 import { GLOBALS, PATRON } from '../../util/globals';
@@ -383,6 +383,26 @@ export const DrawerContent = () => {
                logDebugMessage("Error fetching pickup locations");
                logErrorMessage(error);
           }
+     });
+
+     useQuery(['pickup_sub_locations', library.baseUrl, language], () => getPickupSublocations(library.baseUrl), {
+          refetchInterval: 60 * 1000 * 30,
+          refetchIntervalInBackground: true,
+          placeholderData: [],
+          onSuccess: (data) => {
+               logDebugMessage('Finished pickup_sub_locations query, setting data');
+               if (data) {
+                    logDebugMessage('Finished pickup_sub_locations query, done setting data');
+               } else {
+                    logDebugMessage('Error with pickup_sub_locations query');
+                    logDebugMessage(data);
+                    getErrorMessage(data.code ?? 0, data.problem);
+               }
+          },
+          onError: (error) => {
+               logDebugMessage('Error fetching pickup sublocations');
+               logErrorMessage(error);
+          },
      });
 
      useQuery(['locations', library.baseUrl, language, userLatitude, userLongitude], () => getLocations(library.baseUrl, language, userLatitude, userLongitude), {
